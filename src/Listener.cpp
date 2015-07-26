@@ -429,6 +429,7 @@ void Listener::Accept( thread_Settings *server ) {
             rc = recvfrom( mSettings->mSock, mBuf, mSettings->mBufLen, 0, 
                            (struct sockaddr*) &server->peer, &server->size_peer );
             FAIL_errno( rc == SOCKET_ERROR, "recvfrom", mSettings );
+                       struct sockaddr_in* peer = (struct sockaddr_in*) &server->peer;
 
             Mutex_Lock( &clients_mutex );
     

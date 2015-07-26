@@ -103,11 +103,31 @@ void Server::Run( void ) {
 
     ReportStruct *reportstruct = NULL;
 
+    int rc;
+
+    fd_set readSet;
+    FD_ZERO( &readSet );
+
+    struct timeval timeout;
+
     reportstruct = new ReportStruct;
     if ( reportstruct != NULL ) {
         reportstruct->packetID = 0;
         mSettings->reporthdr = InitReport( mSettings );
         do {
+
+            FD_SET( mSettings->mSock, &readSet );
+            timeout.tv_sec  = 60; /* FIXME: Should be optional */
+            timeout.tv_usec = 0;
+            rc = select( mSettings->mSock+1, &readSet, NULL, NULL, &timeout );
+            FAIL_errno( rc == SOCKET_ERROR, "select", mSettings );
+
+            if ( rc == 0 ) {
+                // select timed out
+                               printf("Never received data for %ld sec.\n",timeout.tv_sec);
+                break;
+            }
+
             // perform read 
             currLen = recv( mSettings->mSock, mBuf, mSettings->mBufLen, 0 ); 
         
